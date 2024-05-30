@@ -5,6 +5,7 @@ dependencies {
     api project(':jdbc')
 
     testImplementation project(':jdbc-test')
-    testRuntimeOnly 'ru.yandex.clickhouse:clickhouse-jdbc:0.3.2'
+    testRuntimeOnly 'com.clickhouse:clickhouse-jdbc:0.6.0-patch5:http'
+    testImplementation 'org.apache.httpcomponents.client5:httpclient5:5.3.1'
     testImplementation 'org.assertj:assertj-core:3.25.3'
 }

@@ -4,7 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.testcontainers.ClickhouseTestImages;
-import org.testcontainers.containers.ClickHouseContainer;
+import org.testcontainers.clickhouse.ClickHouseContainer;
 import org.testcontainers.db.AbstractContainerDatabaseTest;
 import org.testcontainers.utility.DockerImageName;
 
@@ -26,7 +26,6 @@ public class SimpleClickhouseTest extends AbstractContainerDatabaseTest {
     public static Object[][] data() {
         return new Object[][] { //
             { ClickhouseTestImages.CLICKHOUSE_IMAGE },
-            { ClickhouseTestImages.YANDEX_CLICKHOUSE_IMAGE },
         };
     }
 

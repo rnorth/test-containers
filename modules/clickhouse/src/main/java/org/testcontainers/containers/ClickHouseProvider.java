@@ -1,5 +1,6 @@
 package org.testcontainers.containers;
 
+import org.testcontainers.clickhouse.ClickHouseContainer;
 import org.testcontainers.utility.DockerImageName;
 
 public class ClickHouseProvider extends JdbcDatabaseContainerProvider {

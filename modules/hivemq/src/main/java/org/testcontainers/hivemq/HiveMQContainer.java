@@ -146,19 +146,20 @@ public class HiveMQContainer extends GenericContainer<HiveMQContainer> {
     }
 
     @Override
-    public void copyFileToContainer(final @NotNull MountableFile mountableFile, @NotNull String containerPath) {
-        if (!isStarted && removePrepackagedExtensions() && containerPath.startsWith("/opt/hivemq/extensions/")) {
-            containerPath = "/opt/hivemq/temp-extensions/" + containerPath.substring("/opt/hivemq/extensions/".length());
-        }
-        super.copyFileToContainer(mountableFile, containerPath);
+    public void copyFileToContainer(final @NotNull MountableFile mountableFile, final @NotNull String containerPath) {
+        super.copyFileToContainer(mountableFile, mapContainerPathIfRequired(containerPath));
     }
 
     @Override
-    public void copyFileToContainer(final @NotNull Transferable transferable, @NotNull String containerPath) {
+    public void copyFileToContainer(final @NotNull Transferable transferable, final @NotNull String containerPath) {
+        super.copyFileToContainer(transferable, mapContainerPathIfRequired(containerPath));
+    }
+
+    private @NotNull String mapContainerPathIfRequired(final @NotNull String containerPath) {
         if (!isStarted && removePrepackagedExtensions() && containerPath.startsWith("/opt/hivemq/extensions/")) {
-            containerPath = "/opt/hivemq/temp-extensions/" + containerPath.substring("/opt/hivemq/extensions/".length());
+            return "/opt/hivemq/temp-extensions/" + containerPath.substring("/opt/hivemq/extensions/".length());
         }
-        super.copyFileToContainer(transferable, containerPath);
+        return containerPath;
     }
 
     protected void containerIsStarted(final @NotNull InspectContainerResponse containerInfo) {

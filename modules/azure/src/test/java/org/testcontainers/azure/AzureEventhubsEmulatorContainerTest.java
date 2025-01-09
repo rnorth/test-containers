@@ -7,8 +7,6 @@ import com.azure.messaging.eventhubs.EventHubConsumerClient;
 import com.azure.messaging.eventhubs.EventHubProducerClient;
 import com.azure.messaging.eventhubs.models.EventPosition;
 import com.azure.messaging.eventhubs.models.PartitionEvent;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.testcontainers.containers.Network;
@@ -18,31 +16,18 @@ import org.testcontainers.utility.MountableFile;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Optional;
-import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.waitAtMost;
 
 public class AzureEventhubsEmulatorContainerTest {
 
-    private static Properties originalSystemProperties;
-
-    @BeforeClass
-    public static void captureOriginalSystemProperties() {
-        originalSystemProperties = (Properties) System.getProperties().clone();
-    }
-
-    @AfterClass
-    public static void restoreOriginalSystemProperties() {
-        System.setProperties(originalSystemProperties);
-    }
-
     @Rule
     // emulatorContainer {
     public AzureEventhubsEmulatorContainer emulator = new AzureEventhubsEmulatorContainer(
         DockerImageName.parse("mcr.microsoft.com/azure-messaging/eventhubs-emulator:2.0.1")
     )
-        .acceptEula()
+        .acceptLicense()
         .withNetwork(Network.newNetwork())
         .withConfig(MountableFile.forClasspathResource("/eventhubs_config.json"));
 

@@ -2,8 +2,9 @@ package org.testcontainers.azure;
 
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
-import org.testcontainers.utility.MountableFile;
+import org.testcontainers.utility.LicenseAcceptance;
 
 /**
  * Testcontainers implementation for Azure Eventhubs Emulator.
@@ -31,7 +32,7 @@ public class AzureEventhubsEmulatorContainer extends GenericContainer<AzureEvent
 
     private AzuriteContainer azuriteContainer;
 
-    private MountableFile config;
+    private Transferable config;
 
     /**
      * @param dockerImageName specified docker image name to run
@@ -69,7 +70,7 @@ public class AzureEventhubsEmulatorContainer extends GenericContainer<AzureEvent
      * @param config The file containing the broker configuration
      * @return this
      */
-    public AzureEventhubsEmulatorContainer withConfig(final MountableFile config) {
+    public AzureEventhubsEmulatorContainer withConfig(final Transferable config) {
         this.config = config;
         return this;
     }
@@ -79,7 +80,7 @@ public class AzureEventhubsEmulatorContainer extends GenericContainer<AzureEvent
      *
      * @return this
      */
-    public AzureEventhubsEmulatorContainer acceptEula() {
+    public AzureEventhubsEmulatorContainer acceptLicense() {
         return withEnv("ACCEPT_EULA", "Y");
     }
 
@@ -89,9 +90,14 @@ public class AzureEventhubsEmulatorContainer extends GenericContainer<AzureEvent
         final String azuriteHost = azuriteContainer.getNetworkAliases().get(0);
         withEnv("BLOB_SERVER", azuriteHost);
         withEnv("METADATA_SERVER", azuriteHost);
+        // If license was not accepted programatically, check if it was accepted via resource file
+        if (!getEnvMap().containsKey("ACCEPT_EULA")) {
+            LicenseAcceptance.assertLicenseAccepted(this.getDockerImageName());
+            acceptLicense();
+        }
         if (this.config != null) {
             logger().info("Using path for configuration file: '{}'", this.config);
-            withCopyFileToContainer(this.config, "/Eventhubs_Emulator/ConfigFiles/Config.json");
+            withCopyToContainer(this.config, "/Eventhubs_Emulator/ConfigFiles/Config.json");
         }
     }
 

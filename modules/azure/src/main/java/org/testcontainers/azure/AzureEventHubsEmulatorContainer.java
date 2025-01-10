@@ -32,7 +32,7 @@ public class AzureEventHubsEmulatorContainer extends GenericContainer<AzureEvent
         "mcr.microsoft.com/azure-messaging/eventhubs-emulator"
     );
 
-    private AzuriteContainer azuriteContainer;
+    private final AzuriteContainer azuriteContainer;
 
     private Transferable config;
 
@@ -48,7 +48,7 @@ public class AzureEventHubsEmulatorContainer extends GenericContainer<AzureEvent
         super(dockerImageName);
         dockerImageName.assertCompatibleWith(DEFAULT_IMAGE_NAME);
         this.azuriteContainer = azuriteContainer;
-        dependsOn(azuriteContainer);
+        dependsOn(this.azuriteContainer);
         waitingFor(Wait.forLogMessage(".*Emulator Service is Successfully Up!.*", 1));
         withExposedPorts(DEFAULT_AMQP_PORT);
     }
@@ -85,11 +85,10 @@ public class AzureEventHubsEmulatorContainer extends GenericContainer<AzureEvent
 
     @Override
     protected void configure() {
-        dependsOn(azuriteContainer);
         final String azuriteHost = azuriteContainer.getNetworkAliases().get(0);
         withEnv("BLOB_SERVER", azuriteHost);
         withEnv("METADATA_SERVER", azuriteHost);
-        // If license was not accepted programatically, check if it was accepted via resource file
+        // If license was not accepted programmatically, check if it was accepted via resource file
         if (!getEnvMap().containsKey("ACCEPT_EULA")) {
             LicenseAcceptance.assertLicenseAccepted(this.getDockerImageName());
             acceptLicense();
@@ -99,7 +98,7 @@ public class AzureEventHubsEmulatorContainer extends GenericContainer<AzureEvent
             withCopyToContainer(this.config, "/Eventhubs_Emulator/ConfigFiles/Config.json");
         }
         if (this.useKafka) {
-            //Kafka must use the default port or the advertised port won't match
+            //Kafka must expose with the fixed default port or the broker's advertised port won't match
             this.addFixedExposedPort(DEFAULT_KAFKA_PORT, DEFAULT_KAFKA_PORT);
         }
     }

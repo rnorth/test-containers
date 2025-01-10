@@ -82,7 +82,7 @@ Build Azure Table client:
 Start Azure Event Hubs Emulator during a test:
 
 <!--codeinclude-->
-[Setting uo a network](../../modules/azure/src/test/java/org/testcontainers/azure/AzureEventHubsEmulatorContainerTest.java) inside_block:network
+[Setting up a network](../../modules/azure/src/test/java/org/testcontainers/azure/AzureEventHubsEmulatorContainerTest.java) inside_block:network
 <!--/codeinclude-->
 
 <!--codeinclude-->
@@ -90,7 +90,7 @@ Start Azure Event Hubs Emulator during a test:
 <!--/codeinclude-->
 
 <!--codeinclude-->
-[Starting a Azure Event Hubs Emulator container](../../modules/azure/src/test/java/org/testcontainers/azure/AzureEventHubsEmulatorContainerTest.java) inside_block:emulatorContainer
+[Starting an Azure Event Hubs Emulator container](../../modules/azure/src/test/java/org/testcontainers/azure/AzureEventHubsEmulatorContainerTest.java) inside_block:emulatorContainer
 <!--/codeinclude-->
 
 #### Using Azure Event Hubs clients

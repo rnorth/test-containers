@@ -17,7 +17,7 @@ import org.testcontainers.utility.LicenseAcceptance;
  *     <li>Kafka: 9092</li>
  * </ul>
  */
-public class AzureEventhubsEmulatorContainer extends GenericContainer<AzureEventhubsEmulatorContainer> {
+public class AzureEventHubsEmulatorContainer extends GenericContainer<AzureEventHubsEmulatorContainer> {
 
     private static final int DEFAULT_AMQP_PORT = 5672;
 
@@ -25,6 +25,8 @@ public class AzureEventhubsEmulatorContainer extends GenericContainer<AzureEvent
 
     private static final String CONNECTION_STRING_FORMAT =
         "Endpoint=sb://%s:%d;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;";
+
+    private static final String BOOTSTRAP_SERVERS_FORMAT = "%s:%d";
 
     private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse(
         "mcr.microsoft.com/azure-messaging/eventhubs-emulator"
@@ -34,34 +36,21 @@ public class AzureEventhubsEmulatorContainer extends GenericContainer<AzureEvent
 
     private Transferable config;
 
+    private boolean useKafka;
+
     /**
      * @param dockerImageName specified docker image name to run
      */
-    public AzureEventhubsEmulatorContainer(final DockerImageName dockerImageName) {
+    public AzureEventHubsEmulatorContainer(
+        final DockerImageName dockerImageName,
+        final AzuriteContainer azuriteContainer
+    ) {
         super(dockerImageName);
         dockerImageName.assertCompatibleWith(DEFAULT_IMAGE_NAME);
-
+        this.azuriteContainer = azuriteContainer;
+        dependsOn(azuriteContainer);
         waitingFor(Wait.forLogMessage(".*Emulator Service is Successfully Up!.*", 1));
-        withExposedPorts(DEFAULT_AMQP_PORT, DEFAULT_KAFKA_PORT);
-    }
-
-    @Override
-    public void start() {
-        if (this.azuriteContainer == null) {
-            this.azuriteContainer =
-                new AzuriteContainer(AzuriteContainer.DEFAULT_IMAGE_NAME.withTag("3.33.0")).withNetwork(getNetwork());
-        }
-        this.azuriteContainer.start();
-
-        super.start();
-    }
-
-    @Override
-    public void stop() {
-        super.stop();
-        if (this.azuriteContainer != null) {
-            this.azuriteContainer.stop();
-        }
+        withExposedPorts(DEFAULT_AMQP_PORT);
     }
 
     /**
@@ -70,7 +59,7 @@ public class AzureEventhubsEmulatorContainer extends GenericContainer<AzureEvent
      * @param config The file containing the broker configuration
      * @return this
      */
-    public AzureEventhubsEmulatorContainer withConfig(final Transferable config) {
+    public AzureEventHubsEmulatorContainer withConfig(final Transferable config) {
         this.config = config;
         return this;
     }
@@ -80,8 +69,18 @@ public class AzureEventhubsEmulatorContainer extends GenericContainer<AzureEvent
      *
      * @return this
      */
-    public AzureEventhubsEmulatorContainer acceptLicense() {
+    public AzureEventHubsEmulatorContainer acceptLicense() {
         return withEnv("ACCEPT_EULA", "Y");
+    }
+
+    /**
+     * Enables Kafka support.
+     *
+     * @return this
+     */
+    public AzureEventHubsEmulatorContainer enableKafka() {
+        this.useKafka = true;
+        return this;
     }
 
     @Override
@@ -99,6 +98,10 @@ public class AzureEventhubsEmulatorContainer extends GenericContainer<AzureEvent
             logger().info("Using path for configuration file: '{}'", this.config);
             withCopyToContainer(this.config, "/Eventhubs_Emulator/ConfigFiles/Config.json");
         }
+        if (this.useKafka) {
+            //Kafka must use the default port or the advertised port won't match
+            this.addFixedExposedPort(DEFAULT_KAFKA_PORT, DEFAULT_KAFKA_PORT);
+        }
     }
 
     /**
@@ -108,5 +111,14 @@ public class AzureEventhubsEmulatorContainer extends GenericContainer<AzureEvent
      */
     public String getConnectionString() {
         return String.format(CONNECTION_STRING_FORMAT, getHost(), getMappedPort(DEFAULT_AMQP_PORT));
+    }
+
+    /**
+     * Returns the kafka bootstrap servers
+     *
+     * @return bootstrap servers
+     */
+    public String getBootstrapServers() {
+        return String.format(BOOTSTRAP_SERVERS_FORMAT, getHost(), getMappedPort(DEFAULT_KAFKA_PORT));
     }
 }

@@ -40,7 +40,9 @@ public class AzuriteContainer extends GenericContainer<AzuriteContainer> {
     private static final String WELL_KNOWN_ACCOUNT_KEY =
         "Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==";
 
-    static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse("mcr.microsoft.com/azure-storage/azurite");
+    private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse(
+        "mcr.microsoft.com/azure-storage/azurite"
+    );
 
     private MountableFile cert = null;
 

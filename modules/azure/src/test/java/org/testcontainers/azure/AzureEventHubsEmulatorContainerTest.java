@@ -63,7 +63,7 @@ public class AzureEventHubsEmulatorContainerTest {
     // }
 
     @Test
-    public void testWithEventhubsClient() {
+    public void testWithEventHubsClient() {
         try (
             // createProducerAndConsumer {
             EventHubProducerClient producer = new EventHubClientBuilder()

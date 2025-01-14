@@ -1,0 +1,7 @@
+[connection]
+port = 9042
+hostname = 172.17.0.3
+factory = cqlshlib.ssl.ssl_transport_factory
+[ssl]
+certfile = /etc/scylla/node0.cer.pem
+validate = false

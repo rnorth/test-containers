@@ -200,6 +200,10 @@
   - changed-files:
     - any-glob-to-any-file:
       - modules/redpanda/**/*
+"modules/scylladb":
+  - changed-files:
+    - any-glob-to-any-file:
+      - modules/scylladb/**/*
 "modules/selenium":
   - changed-files:
     - any-glob-to-any-file:

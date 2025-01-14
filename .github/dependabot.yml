@@ -311,6 +311,11 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 10
   - package-ecosystem: "gradle"
+    directory: "/modules/scylladb"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+  - package-ecosystem: "gradle"
     directory: "/modules/selenium"
     schedule:
       interval: "weekly"

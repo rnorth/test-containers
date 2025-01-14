@@ -72,6 +72,7 @@ nav:
                 - modules/databases/postgres.md
                 - modules/databases/presto.md
                 - modules/databases/questdb.md
+                - modules/databases/scylladb.md
                 - modules/databases/tidb.md
                 - modules/databases/timeplus.md
                 - modules/databases/trino.md

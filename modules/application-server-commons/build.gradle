@@ -1,0 +1,9 @@
+description = "Testcontainers :: Application Server Common"
+
+dependencies {
+    api project(':testcontainers')
+
+    compileOnly 'org.jetbrains:annotations:24.0.1'
+    implementation 'org.jboss.shrinkwrap:shrinkwrap-impl-base:1.2.6'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+}

@@ -1,0 +1,10 @@
+[
+    {
+        "httpRequest": {
+            "path": "/hello"
+        },
+        "httpResponse": {
+            "body": "Hello World!"
+        }
+    }
+]

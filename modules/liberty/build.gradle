@@ -1,0 +1,14 @@
+description = "Testcontainers :: Application Server :: Liberty"
+
+dependencies {
+    api project(':application-server-commons')
+
+    compileOnly 'org.jetbrains:annotations:24.0.1'
+
+    implementation 'org.jboss.shrinkwrap:shrinkwrap-impl-base:1.2.6'
+
+    testImplementation project(':mockserver')
+    testImplementation 'io.rest-assured:rest-assured:5.3.0'
+    testImplementation 'jakarta.ws.rs:jakarta.ws.rs-api:3.1.0'
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+}

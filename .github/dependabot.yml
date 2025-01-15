@@ -36,6 +36,12 @@ updates:
 
 # Explicit entry for each module
   - package-ecosystem: "gradle"
+    directory: "/modules/application-server-commons"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 10
+  - package-ecosystem: "gradle"
+    directory: "/modules/azure"
     directory: "/modules/activemq"
     schedule:
       interval: "monthly"
@@ -177,6 +183,11 @@ updates:
     directory: "/modules/kafka"
     schedule:
       interval: "weekly"
+    open-pull-requests-limit: 10
+  - package-ecosystem: "gradle"
+    directory: "/modules/liberty"
+    schedule:
+      interval: "monthly"
     open-pull-requests-limit: 10
   - package-ecosystem: "gradle"
     directory: "/modules/localstack"

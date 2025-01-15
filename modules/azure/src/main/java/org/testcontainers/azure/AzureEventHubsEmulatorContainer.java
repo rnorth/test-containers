@@ -34,8 +34,6 @@ public class AzureEventHubsEmulatorContainer extends GenericContainer<AzureEvent
 
     private final AzuriteContainer azuriteContainer;
 
-    private Transferable config;
-
     private boolean useKafka;
 
     /**
@@ -60,7 +58,7 @@ public class AzureEventHubsEmulatorContainer extends GenericContainer<AzureEvent
      * @return this
      */
     public AzureEventHubsEmulatorContainer withConfig(final Transferable config) {
-        this.config = config;
+        withCopyToContainer(config, "/Eventhubs_Emulator/ConfigFiles/Config.json");
         return this;
     }
 
@@ -92,10 +90,6 @@ public class AzureEventHubsEmulatorContainer extends GenericContainer<AzureEvent
         if (!getEnvMap().containsKey("ACCEPT_EULA")) {
             LicenseAcceptance.assertLicenseAccepted(this.getDockerImageName());
             acceptLicense();
-        }
-        if (this.config != null) {
-            logger().info("Using path for configuration file: '{}'", this.config);
-            withCopyToContainer(this.config, "/Eventhubs_Emulator/ConfigFiles/Config.json");
         }
         if (this.useKafka) {
             //Kafka must expose with the fixed default port or the broker's advertised port won't match

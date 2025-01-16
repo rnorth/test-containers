@@ -5,11 +5,12 @@ This module is INCUBATING. While it is ready for use and operational in the curr
 
 Testcontainers module for the Microsoft Azure's [SDK](https://github.com/Azure/azure-sdk-for-java).
 
-Currently, the module supports `Azurite` and `CosmosDB` emulators. In order to use them, you should use the following classes:
+Currently, the module supports `Azurite`, `Azure Event Hubs` and `CosmosDB` emulators. In order to use them, you should use the following classes:
 
 Class | Container Image
 -|-
 AzuriteContainer | [mcr.microsoft.com/azure-storage/azurite](https://github.com/microsoft/containerregistry)
+AzureEventHubsEmulatorContainer | [mcr.microsoft.com/azure-messaging/eventhubs-emulator](https://github.com/microsoft/containerregistry)
 CosmosDBEmulatorContainer | [mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator](https://github.com/microsoft/containerregistry)
 
 ## Usage example
@@ -71,6 +72,42 @@ Build Azure Table client:
 
 !!! note
     We can use custom credentials the same way as defined in the Blob section.
+
+### Azure Event Hubs Emulator
+
+<!--codeinclude-->
+[Configuring the Azure Event Hubs Emulator container](../../modules/azure/src/test/resources/eventhubs_config.json)
+<!--/codeinclude-->
+
+Start Azure Event Hubs Emulator during a test:
+
+<!--codeinclude-->
+[Setting up a network](../../modules/azure/src/test/java/org/testcontainers/azure/AzureEventHubsEmulatorContainerTest.java) inside_block:network
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Starting an Azurite container as dependency](../../modules/azure/src/test/java/org/testcontainers/azure/AzureEventHubsEmulatorContainerTest.java) inside_block:azuriteContainer
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Starting an Azure Event Hubs Emulator container](../../modules/azure/src/test/java/org/testcontainers/azure/AzureEventHubsEmulatorContainerTest.java) inside_block:emulatorContainer
+<!--/codeinclude-->
+
+#### Using Azure Event Hubs clients
+
+Configure the consumer and the producer clients:
+
+<!--codeinclude-->
+[Configuring the clients](../../modules/azure/src/test/java/org/testcontainers/azure/AzureEventHubsEmulatorContainerTest.java) inside_block:createProducerAndConsumer
+<!--/codeinclude-->
+
+#### Using Kafka clients
+
+Configure the consumer and the producer clients:
+
+<!--codeinclude-->
+[Obtaining the Kafka connection properties](../../modules/azure/src/test/java/org/testcontainers/azure/AzureEventHubsEmulatorContainerTest.java) inside_block:kafkaProperties
+<!--/codeinclude-->
 
 ### CosmosDB
 

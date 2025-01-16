@@ -32,23 +32,37 @@ public class AzureEventHubsEmulatorContainer extends GenericContainer<AzureEvent
         "mcr.microsoft.com/azure-messaging/eventhubs-emulator"
     );
 
-    private final AzuriteContainer azuriteContainer;
+    private AzuriteContainer azuriteContainer;
 
     private boolean useKafka;
 
     /**
      * @param dockerImageName specified docker image name to run
      */
-    public AzureEventHubsEmulatorContainer(
-        final DockerImageName dockerImageName,
-        final AzuriteContainer azuriteContainer
-    ) {
+    public AzureEventHubsEmulatorContainer(final String dockerImageName) {
+        this(DockerImageName.parse(dockerImageName));
+    }
+
+    /**
+     * @param dockerImageName specified docker image name to run
+     */
+    public AzureEventHubsEmulatorContainer(final DockerImageName dockerImageName) {
         super(dockerImageName);
         dockerImageName.assertCompatibleWith(DEFAULT_IMAGE_NAME);
-        this.azuriteContainer = azuriteContainer;
-        dependsOn(this.azuriteContainer);
         waitingFor(Wait.forLogMessage(".*Emulator Service is Successfully Up!.*", 1));
         withExposedPorts(DEFAULT_AMQP_PORT);
+    }
+
+    /**
+     * * Sets the Azurite dependency needed by the Event Hubs Container,
+     *
+     * @param azuriteContainer The Azurite container used by Event HUbs as a dependency
+     * @return this
+     */
+    public AzureEventHubsEmulatorContainer withAzuriteContainer(final AzuriteContainer azuriteContainer) {
+        this.azuriteContainer = azuriteContainer;
+        dependsOn(this.azuriteContainer);
+        return this;
     }
 
     /**
@@ -83,6 +97,13 @@ public class AzureEventHubsEmulatorContainer extends GenericContainer<AzureEvent
 
     @Override
     protected void configure() {
+        if (azuriteContainer == null) {
+            throw new IllegalStateException(
+                "The image " +
+                getDockerImageName() +
+                " requires an Azurite container. Please provide one with the withAzuriteContainer method!"
+            );
+        }
         final String azuriteHost = azuriteContainer.getNetworkAliases().get(0);
         withEnv("BLOB_SERVER", azuriteHost);
         withEnv("METADATA_SERVER", azuriteHost);

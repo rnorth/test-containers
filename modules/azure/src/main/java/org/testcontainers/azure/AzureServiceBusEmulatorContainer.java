@@ -17,12 +17,12 @@ import org.testcontainers.utility.LicenseAcceptance;
 public class AzureServiceBusEmulatorContainer extends GenericContainer<AzureServiceBusEmulatorContainer> {
 
     private static final String CONNECTION_STRING_FORMAT =
-        "Endpoint=sb://%s:%d;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;";
+            "Endpoint=sb://%s:%d;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;";
 
     private static final int DEFAULT_PORT = 5672;
 
     private static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse(
-        "mcr.microsoft.com/azure-messaging/servicebus-emulator"
+            "mcr.microsoft.com/azure-messaging/servicebus-emulator"
     );
 
     private MSSQLServerContainer<?> msSqlServerContainer;
@@ -51,7 +51,7 @@ public class AzureServiceBusEmulatorContainer extends GenericContainer<AzureServ
      * @return this
      */
     public AzureServiceBusEmulatorContainer withMsSqlServerContainer(
-        final MSSQLServerContainer<?> msSqlServerContainer
+            final MSSQLServerContainer<?> msSqlServerContainer
     ) {
         dependsOn(msSqlServerContainer);
         this.msSqlServerContainer = msSqlServerContainer;
@@ -82,9 +82,9 @@ public class AzureServiceBusEmulatorContainer extends GenericContainer<AzureServ
     protected void configure() {
         if (msSqlServerContainer == null) {
             throw new IllegalStateException(
-                "The image " +
-                getDockerImageName() +
-                " requires an Microsoft SQL Server container. Please provide one with the withMsSqlServerContainer method!"
+                    "The image " +
+                            getDockerImageName() +
+                            " requires a Microsoft SQL Server container. Please provide one with the withMsSqlServerContainer method!"
             );
         }
         withEnv("SQL_SERVER", msSqlServerContainer.getNetworkAliases().get(0));

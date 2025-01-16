@@ -25,22 +25,37 @@ public class AzureServiceBusEmulatorContainer extends GenericContainer<AzureServ
         "mcr.microsoft.com/azure-messaging/servicebus-emulator"
     );
 
-    private final MSSQLServerContainer<?> mssqlServerContainer;
+    private MSSQLServerContainer<?> msSqlServerContainer;
 
     /**
-     * @param dockerImageName      The specified docker image name to run
-     * @param mssqlServerContainer The MS SQL Server container used by Service Bus as a dependency
+     * @param dockerImageName The specified docker image name to run
      */
-    public AzureServiceBusEmulatorContainer(
-        final DockerImageName dockerImageName,
-        final MSSQLServerContainer<?> mssqlServerContainer
-    ) {
+    public AzureServiceBusEmulatorContainer(final String dockerImageName) {
+        this(DockerImageName.parse(dockerImageName));
+    }
+
+    /**
+     * @param dockerImageName The specified docker image name to run
+     */
+    public AzureServiceBusEmulatorContainer(final DockerImageName dockerImageName) {
         super(dockerImageName);
         dockerImageName.assertCompatibleWith(DEFAULT_IMAGE_NAME);
-        this.mssqlServerContainer = mssqlServerContainer;
-        dependsOn(mssqlServerContainer);
         withExposedPorts(DEFAULT_PORT);
         waitingFor(Wait.forLogMessage(".*Emulator Service is Successfully Up!.*", 1));
+    }
+
+    /**
+     * Sets the MS SQL Server dependency needed by the Service Bus Container,
+     *
+     * @param msSqlServerContainer The MS SQL Server container used by Service Bus as a dependency
+     * @return this
+     */
+    public AzureServiceBusEmulatorContainer withMsSqlServerContainer(
+        final MSSQLServerContainer<?> msSqlServerContainer
+    ) {
+        dependsOn(msSqlServerContainer);
+        this.msSqlServerContainer = msSqlServerContainer;
+        return this;
     }
 
     /**
@@ -65,8 +80,15 @@ public class AzureServiceBusEmulatorContainer extends GenericContainer<AzureServ
 
     @Override
     protected void configure() {
-        withEnv("SQL_SERVER", mssqlServerContainer.getNetworkAliases().get(0));
-        withEnv("MSSQL_SA_PASSWORD", mssqlServerContainer.getPassword());
+        if (msSqlServerContainer == null) {
+            throw new IllegalStateException(
+                "The image " +
+                getDockerImageName() +
+                " requires an Microsoft SQL Server container. Please provide one with the withMsSqlServerContainer method!"
+            );
+        }
+        withEnv("SQL_SERVER", msSqlServerContainer.getNetworkAliases().get(0));
+        withEnv("MSSQL_SA_PASSWORD", msSqlServerContainer.getPassword());
         // If license was not accepted programmatically, check if it was accepted via resource file
         if (!getEnvMap().containsKey("ACCEPT_EULA")) {
             LicenseAcceptance.assertLicenseAccepted(this.getDockerImageName());

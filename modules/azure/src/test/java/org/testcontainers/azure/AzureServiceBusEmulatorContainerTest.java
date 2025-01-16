@@ -2,34 +2,32 @@ package org.testcontainers.azure;
 
 import com.azure.messaging.servicebus.ServiceBusClientBuilder;
 import com.azure.messaging.servicebus.ServiceBusErrorContext;
+import com.azure.messaging.servicebus.ServiceBusException;
 import com.azure.messaging.servicebus.ServiceBusMessage;
 import com.azure.messaging.servicebus.ServiceBusProcessorClient;
-import com.azure.messaging.servicebus.ServiceBusReceivedMessage;
 import com.azure.messaging.servicebus.ServiceBusReceivedMessageContext;
 import com.azure.messaging.servicebus.ServiceBusSenderClient;
-import com.azure.messaging.servicebus.ServiceBusTransactionContext;
 import com.github.dockerjava.api.model.Capability;
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.containers.Network;
-import org.testcontainers.utility.DockerImageName;
 import org.testcontainers.utility.MountableFile;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 public class AzureServiceBusEmulatorContainerTest {
 
     @Rule
     // network {
     public Network network = Network.newNetwork();
-
     // }
 
     @Rule
@@ -43,23 +41,21 @@ public class AzureServiceBusEmulatorContainerTest {
             cmd.getHostConfig().withCapAdd(Capability.SYS_PTRACE);
         })
         .withNetwork(network);
-
     // }
 
     @Rule
     // emulatorContainer {
     public AzureServiceBusEmulatorContainer emulator = new AzureServiceBusEmulatorContainer(
-        DockerImageName.parse("mcr.microsoft.com/azure-messaging/servicebus-emulator:1.0.1"),
-        mssqlServerContainer
+        "mcr.microsoft.com/azure-messaging/servicebus-emulator:1.0.1"
     )
         .acceptLicense()
         .withConfig(MountableFile.forClasspathResource("/service-bus-config.json"))
-        .withNetwork(network);
-
+        .withNetwork(network)
+        .withMsSqlServerContainer(mssqlServerContainer);
     // }
 
     @Test
-    public void testWithClient() throws InterruptedException {
+    public void testWithClient() {
         assertThat(emulator.getConnectionString()).startsWith("Endpoint=sb://");
 
         // senderClient {
@@ -70,16 +66,18 @@ public class AzureServiceBusEmulatorContainerTest {
             .buildClient();
         // }
 
-        TimeUnit.SECONDS.sleep(5);
-        ServiceBusTransactionContext transaction = senderClient.createTransaction();
-        senderClient.sendMessage(new ServiceBusMessage("Hello, Testcontainers!"), transaction);
-        senderClient.commitTransaction(transaction);
+        await()
+            .atMost(20, TimeUnit.SECONDS)
+            .ignoreException(ServiceBusException.class)
+            .until(() -> {
+                senderClient.sendMessage(new ServiceBusMessage("Hello, Testcontainers!"));
+                return true;
+            });
         senderClient.close();
 
-        TimeUnit.SECONDS.sleep(5);
-        final List<ServiceBusReceivedMessage> received = new ArrayList<>();
+        final List<String> received = new CopyOnWriteArrayList<>();
         Consumer<ServiceBusReceivedMessageContext> messageConsumer = m -> {
-            received.add(m.getMessage());
+            received.add(m.getMessage().getBody().toString());
             m.complete();
         };
         Consumer<ServiceBusErrorContext> errorConsumer = e -> Assertions.fail("Unexpected error: " + e);
@@ -94,9 +92,11 @@ public class AzureServiceBusEmulatorContainerTest {
         // }
         processorClient.start();
 
-        TimeUnit.SECONDS.sleep(10);
+        await()
+            .atMost(20, TimeUnit.SECONDS)
+            .untilAsserted(() -> {
+                assertThat(received).hasSize(1).containsExactlyInAnyOrder("Hello, Testcontainers!");
+            });
         processorClient.close();
-        assertThat(received).hasSize(1);
-        assertThat(received.get(0).getBody().toString()).isEqualTo("Hello, Testcontainers!");
     }
 }

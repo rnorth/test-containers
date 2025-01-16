@@ -5,11 +5,12 @@ This module is INCUBATING. While it is ready for use and operational in the curr
 
 Testcontainers module for the Microsoft Azure's [SDK](https://github.com/Azure/azure-sdk-for-java).
 
-Currently, the module supports `Azurite` and `CosmosDB` emulators. In order to use them, you should use the following classes:
+Currently, the module supports `Azurite`, `Azure Service Bus` and `CosmosDB` emulators. In order to use them, you should use the following classes:
 
 Class | Container Image
 -|-
 AzuriteContainer | [mcr.microsoft.com/azure-storage/azurite](https://github.com/microsoft/containerregistry)
+AzureServiceBusEmulatorContainer | [mcr.microsoft.com/azure-messaging/servicebus-emulator](https://github.com/microsoft/containerregistry)
 CosmosDBEmulatorContainer | [mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator](https://github.com/microsoft/containerregistry)
 
 ## Usage example
@@ -71,6 +72,38 @@ Build Azure Table client:
 
 !!! note
     We can use custom credentials the same way as defined in the Blob section.
+
+### Azure Service Bus Emulator
+
+<!--codeinclude-->
+[Configuring the Azure Service Bus Emulator container](../../modules/azure/src/test/resources/service-bus-config.json)
+<!--/codeinclude-->
+
+Start Azure Service Bus Emulator during a test:
+
+<!--codeinclude-->
+[Setting up a network](../../modules/azure/src/test/java/org/testcontainers/azure/AzureServiceBusEmulatorContainerTest.java) inside_block:network
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Starting a SQL Server container as dependency](../../modules/azure/src/test/java/org/testcontainers/azure/AzureServiceBusEmulatorContainerTest.java) inside_block:sqlContainer
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Starting a Service Bus Emulator container](../../modules/azure/src/test/java/org/testcontainers/azure/AzureServiceBusEmulatorContainerTest.java) inside_block:emulatorContainer
+<!--/codeinclude-->
+
+#### Using Azure Service Bus clients
+
+Configure the sender and the processor clients:
+
+<!--codeinclude-->
+[Configuring the sender client](../../modules/azure/src/test/java/org/testcontainers/azure/AzureServiceBusEmulatorContainerTest.java) inside_block:senderClient
+<!--/codeinclude-->
+
+<!--codeinclude-->
+[Configuring the processor client](../../modules/azure/src/test/java/org/testcontainers/azure/AzureServiceBusEmulatorContainerTest.java) inside_block:processorClient
+<!--/codeinclude-->
 
 ### CosmosDB
 
